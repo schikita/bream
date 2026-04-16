@@ -1,6 +1,7 @@
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isLowMotionMode = prefersReducedMotion || window.innerWidth <= 900;
 
-if (!prefersReducedMotion && window.gsap) {
+if (!isLowMotionMode && window.gsap) {
   gsap.registerPlugin(ScrollTrigger);
 
   const reveals = gsap.utils.toArray(".reveal");
@@ -102,6 +103,28 @@ if (!prefersReducedMotion && window.gsap) {
   });
 }
 
+// Облегченный режим: без blur-фильтров и scrub-анимаций
+if (isLowMotionMode && window.gsap) {
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.utils.toArray(".reveal").forEach((item) => {
+    gsap.fromTo(
+      item,
+      { y: 18, autoAlpha: 0 },
+      {
+        y: 0,
+        autoAlpha: 1,
+        duration: 0.7,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: item,
+          start: "top 92%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
+  });
+}
+
 document.querySelectorAll(".main-nav a").forEach((link) => {
   link.addEventListener("click", (event) => {
     const targetId = link.getAttribute("href");
@@ -160,18 +183,32 @@ if (siteHeader && navToggle && mainNav) {
 }
 
 const parallaxTarget = document.querySelector(".hero__media");
-if (parallaxTarget && !prefersReducedMotion) {
-  window.addEventListener("pointermove", (event) => {
-    const x = (event.clientX / window.innerWidth - 0.5) * 8;
-    const y = (event.clientY / window.innerHeight - 0.5) * 8;
+if (parallaxTarget && !prefersReducedMotion && window.gsap && window.innerWidth > 1100) {
+  let rafId = null;
+  let lastX = 0;
+  let lastY = 0;
+
+  const update = () => {
+    rafId = null;
     gsap.to(parallaxTarget, {
-      x,
-      y,
-      duration: 0.9,
+      x: lastX,
+      y: lastY,
+      duration: 0.6,
       ease: "power3.out",
       overwrite: true,
     });
-  });
+  };
+
+  window.addEventListener(
+    "pointermove",
+    (event) => {
+      lastX = (event.clientX / window.innerWidth - 0.5) * 6;
+      lastY = (event.clientY / window.innerHeight - 0.5) * 6;
+      if (rafId) return;
+      rafId = requestAnimationFrame(update);
+    },
+    { passive: true }
+  );
 }
 
 function initCustomVideoPlayer(config) {

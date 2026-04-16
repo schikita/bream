@@ -843,8 +843,10 @@ function createGameModule() {
     state.animationId = requestAnimationFrame(frame);
   };
 
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     if (state.running) return;
+    // Перед стартом грузим постер/спрайты (если не успели при попадании в viewport)
+    await ensureGameSpritesLoaded();
     start();
   });
 
@@ -916,22 +918,52 @@ function createGameModule() {
   updateHUD();
   button.textContent = "НАЧАТЬ ИГРУ";
 
-  Promise.all([
-    loadImage("./img/sprites/boat-man.png"),
-    loadImage("./img/sprites/boat-man-1.png"),
-    loadImage("./img/sprites/coin.png"),
-    loadImage("./img/sprites/dust.png"),
-    loadImage("./img/sprites/rock.png"),
-    loadImage("./img/sprites/game-poster.jpg"),
-  ]).then(([boat, boatAlt, coin, dust, rock, poster]) => {
-    state.sprites.boat = boat;
-    state.sprites.boatAlt = boatAlt;
-    state.sprites.coin = coin;
-    state.sprites.dust = dust;
-    state.sprites.rock = rock;
-    state.sprites.poster = poster;
-    drawIdleScene();
-  });
+  let spritesLoaded = false;
+  let spritesLoadingPromise = null;
+
+  const ensureGameSpritesLoaded = () => {
+    if (spritesLoaded) return Promise.resolve();
+    if (spritesLoadingPromise) return spritesLoadingPromise;
+
+    spritesLoadingPromise = Promise.all([
+      loadImage("./img/sprites/boat-man.png"),
+      loadImage("./img/sprites/boat-man-1.png"),
+      loadImage("./img/sprites/coin.png"),
+      loadImage("./img/sprites/dust.png"),
+      loadImage("./img/sprites/rock.png"),
+      loadImage("./img/sprites/game-poster.jpg"),
+    ]).then(([boat, boatAlt, coin, dust, rock, poster]) => {
+      state.sprites.boat = boat;
+      state.sprites.boatAlt = boatAlt;
+      state.sprites.coin = coin;
+      state.sprites.dust = dust;
+      state.sprites.rock = rock;
+      state.sprites.poster = poster;
+      spritesLoaded = true;
+
+      if (!state.running) {
+        drawIdleScene();
+        updateHUD();
+      }
+    });
+
+    return spritesLoadingPromise;
+  };
+
+  const gameSection = document.getElementById("game-zone");
+  if (gameSection) {
+    const spriteObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          ensureGameSpritesLoaded();
+          spriteObserver.disconnect();
+        });
+      },
+      { root: null, rootMargin: "0px", threshold: 0.15 }
+    );
+    spriteObserver.observe(gameSection);
+  }
 
   window.GameModule = {
     setSprites(nextSprites) {
@@ -1001,32 +1033,43 @@ function initLazyMediaLoading() {
     tryAutoplay(videoElement);
   };
 
-  const mediaTargets = Array.from(
-    document.querySelectorAll('video[data-lazy-media="true"], img[data-defer-src]')
+  const sectionTargets = Array.from(
+    document.querySelectorAll("section, header.site-header, footer.site-footer")
   );
-  if (mediaTargets.length === 0) return;
+  if (sectionTargets.length === 0) return;
 
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        const media = entry.target;
-        if (media.tagName === "VIDEO") {
-          hydrateVideo(media);
-        } else if (media.tagName === "IMG") {
-          hydrateImage(media);
-        }
-        observer.unobserve(media);
+
+        const section = entry.target;
+
+        // Фоны секций
+        const lazyBgNodes = section.querySelectorAll("[data-lazy-bg]");
+        lazyBgNodes.forEach((node) => {
+          if (!node.dataset || !node.dataset.lazyBg) return;
+          node.style.setProperty("--lazy-bg", `url('${node.dataset.lazyBg}')`);
+        });
+
+        // Картинки внутри секции
+        section.querySelectorAll('img[data-defer-src]').forEach((img) => hydrateImage(img));
+
+        // Видео внутри секции
+        section.querySelectorAll('video[data-lazy-media="true"]').forEach((video) => hydrateVideo(video));
+
+        observer.unobserve(section);
       });
     },
     {
       root: null,
-      rootMargin: "220px 0px",
-      threshold: 0.15,
+      // Подгружать максимально близко к видимой области
+      rootMargin: "0px 0px 0px 0px",
+      threshold: 0.01,
     }
   );
 
-  mediaTargets.forEach((media) => observer.observe(media));
+  sectionTargets.forEach((section) => observer.observe(section));
 }
 
 function initPhotoGalleryLightbox() {
@@ -1052,7 +1095,8 @@ function initPhotoGalleryLightbox() {
   const render = () => {
     const currentImage = galleryItems[currentIndex];
     if (!currentImage) return;
-    lightboxImage.src = currentImage.currentSrc || currentImage.src;
+    lightboxImage.src =
+      currentImage.dataset.deferSrc || currentImage.currentSrc || currentImage.src;
     lightboxImage.alt = currentImage.alt || "Фото галереи";
   };
 

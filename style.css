@@ -154,7 +154,7 @@ body {
 
 .section--inventory.section-cinematic {
   background-image: linear-gradient(180deg, rgba(6, 10, 18, 0.72), rgba(7, 12, 22, 0.78)),
-    url("./img/inventory.jpg");
+    var(--lazy-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -163,7 +163,7 @@ body {
 
 #start-river.section-cinematic {
   background-image: linear-gradient(180deg, rgba(5, 10, 18, 0.7), rgba(7, 12, 22, 0.82)),
-    url("./img/start-bg.jpg");
+    var(--lazy-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -172,7 +172,7 @@ body {
 
 #boats.section-cinematic {
   background-image: linear-gradient(180deg, rgba(5, 10, 18, 0.58), rgba(7, 12, 22, 0.74)),
-    url("./img/nature.jpg");
+    var(--lazy-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -559,7 +559,7 @@ p {
 
 .section--packing-env.section-cinematic {
   background-image: linear-gradient(180deg, rgba(6, 10, 18, 0.72), rgba(7, 12, 22, 0.84)),
-    url("./img/env.jpg");
+    var(--lazy-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -571,7 +571,7 @@ p {
 }
 
 .section--single-story.section-cinematic {
-  background-image: url("./img/single-bg.jpg");
+  background-image: var(--lazy-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -585,7 +585,7 @@ p {
 }
 
 .section--family-story.section-cinematic {
-  background-image: url("./img/family-bg.jpg");
+  background-image: var(--lazy-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -741,7 +741,7 @@ p {
 
 .section--chovny.section-cinematic {
   background-image: linear-gradient(180deg, rgba(7, 12, 22, 0.5), rgba(7, 12, 22, 0.68)),
-    url("./img/question-bg.jpg");
+    var(--lazy-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -761,7 +761,7 @@ p {
 
 .section--master-story.section-cinematic {
   background-image: linear-gradient(180deg, rgba(7, 12, 22, 0.5), rgba(7, 12, 22, 0.72)),
-    url("./img/boot-bg.jpg");
+    var(--lazy-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -778,7 +778,7 @@ p {
 
 .section--dock-story.section-cinematic {
   background-image: linear-gradient(180deg, rgba(7, 12, 22, 0.42), rgba(7, 12, 22, 0.62)),
-    url("./img/man_bg.jpg");
+    var(--lazy-bg, none);
   background-size: cover;
   background-position: center 0px;
   background-repeat: no-repeat;
@@ -792,7 +792,7 @@ p {
 
 .section--pre-last.section-cinematic {
   background-image: linear-gradient(180deg, rgba(7, 12, 22, 0.52), rgba(7, 12, 22, 0.72)),
-    url("./img/pre-last.jpg");
+    var(--lazy-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

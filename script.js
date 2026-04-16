@@ -1046,9 +1046,11 @@ function initLazyMediaLoading() {
         const section = entry.target;
 
         // Фоны секций
-        const lazyBgNodes = section.querySelectorAll("[data-lazy-bg]");
-        lazyBgNodes.forEach((node) => {
-          if (!node.dataset || !node.dataset.lazyBg) return;
+        if (section instanceof HTMLElement && section.dataset && section.dataset.lazyBg) {
+          section.style.setProperty("--lazy-bg", `url('${section.dataset.lazyBg}')`);
+        }
+        section.querySelectorAll("[data-lazy-bg]").forEach((node) => {
+          if (!(node instanceof HTMLElement) || !node.dataset || !node.dataset.lazyBg) return;
           node.style.setProperty("--lazy-bg", `url('${node.dataset.lazyBg}')`);
         });
 

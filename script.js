@@ -221,6 +221,19 @@ function initCustomVideoPlayer(config) {
 
   if (!player || !video || !centerPlayBtn || !fullscreenBtn || !volumeInput) return;
 
+  const ensureVideoLoaded = () => {
+    if (video.dataset.sourcesReady === "true") return;
+    let changed = false;
+    video.querySelectorAll("source[data-src]").forEach((sourceElement) => {
+      const src = sourceElement.dataset.src;
+      if (!src || sourceElement.src) return;
+      sourceElement.src = src;
+      changed = true;
+    });
+    if (changed) video.load();
+    video.dataset.sourcesReady = "true";
+  };
+
   const setFullscreenLabel = (isFullscreen) => {
     fullscreenBtn.setAttribute(
       "aria-label",
@@ -233,11 +246,13 @@ function initCustomVideoPlayer(config) {
   video.muted = video.volume === 0;
 
   centerPlayBtn.addEventListener("click", () => {
+    ensureVideoLoaded();
     video.play();
   });
 
   video.addEventListener("click", () => {
     if (video.paused) {
+      ensureVideoLoaded();
       video.play();
       return;
     }
@@ -1050,6 +1065,7 @@ function initLazyMediaLoading() {
   };
 
   const hydrateVideo = (videoElement) => {
+    if (videoElement.dataset.loadOn === "play") return;
     if (videoElement.dataset.lazyReady === "true") {
       tryAutoplay(videoElement);
       return;

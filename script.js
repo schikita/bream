@@ -1047,11 +1047,17 @@ function initLazyMediaLoading() {
 
         // Фоны секций
         if (section instanceof HTMLElement && section.dataset && section.dataset.lazyBg) {
-          section.style.setProperty("--lazy-bg", `url('${section.dataset.lazyBg}')`);
+          const isMobileViewport = window.innerWidth <= 760;
+          const mobileBg = section.dataset.lazyBgMobile;
+          const bgSrc = isMobileViewport && mobileBg ? mobileBg : section.dataset.lazyBg;
+          section.style.setProperty("--lazy-bg", `url('${bgSrc}')`);
         }
         section.querySelectorAll("[data-lazy-bg]").forEach((node) => {
           if (!(node instanceof HTMLElement) || !node.dataset || !node.dataset.lazyBg) return;
-          node.style.setProperty("--lazy-bg", `url('${node.dataset.lazyBg}')`);
+          const isMobileViewport = window.innerWidth <= 760;
+          const mobileBg = node.dataset.lazyBgMobile;
+          const bgSrc = isMobileViewport && mobileBg ? mobileBg : node.dataset.lazyBg;
+          node.style.setProperty("--lazy-bg", `url('${bgSrc}')`);
         });
 
         // Картинки внутри секции

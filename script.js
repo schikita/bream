@@ -131,7 +131,15 @@ document.querySelectorAll(".main-nav a").forEach((link) => {
     const target = targetId ? document.querySelector(targetId) : null;
     if (!target) return;
     event.preventDefault();
-    target.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+
+    const headerOffset = 96;
+    const rect = target.getBoundingClientRect();
+    const offset = window.pageYOffset + rect.top - headerOffset;
+
+    window.scrollTo({
+      top: offset,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
   });
 });
 

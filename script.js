@@ -132,7 +132,9 @@ document.querySelectorAll(".main-nav a").forEach((link) => {
     if (!target) return;
     event.preventDefault();
 
-    const headerOffset = 96;
+    const header = document.querySelector(".site-header");
+    const baseOffset = window.innerWidth <= 760 ? 72 : 96;
+    const headerOffset = header ? header.getBoundingClientRect().height + 16 : baseOffset;
     const rect = target.getBoundingClientRect();
     const offset = window.pageYOffset + rect.top - headerOffset;
 
